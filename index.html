@@ -97,10 +97,12 @@
     });
 
     loader.onStart = function(){
-      console.log( 'STARS');
+      //init();
+      animate();
+      looper.start();
+      APP_STARTED = true;
 
-    APP_STARTED = true;
-  }
+    }
 
 
   var FIRST_FRAME = true;
@@ -130,14 +132,12 @@
 
   loader.addLoad();
   shaders.shaderSetLoaded = function(){
-    loader.onLoad();
-    
     init();
-    animate();
-    looper.start();
-   
+    loader.onLoad();
+  
   }
 
+  
   var CRYSTAL_PARAMS = [
 
     {

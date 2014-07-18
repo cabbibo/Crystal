@@ -1,7 +1,11 @@
-function Particles( height , audioTexture ){
+function Particles( center , height , audioTexture ){
 
   this.size = 128;
   this.s2  =  this.size * this.size;
+
+  this.center = center;
+  console.log('SNCESNTER' );
+  console.log( center );
 
   this.position = new THREE.Vector3( 0 , height  , 0);
   
@@ -28,6 +32,11 @@ function Particles( height , audioTexture ){
     type:"v3" , value: this.position
   });
 
+  this.physicsRenderer.setUniform( 'uModelView' , {
+      type:"m4",
+      value: this.center.matrixWorld
+  });
+
   this.physicsRenderer.setUniform( 't_audio' , this.t_audio );
 
   var mesh = new THREE.Mesh( new THREE.SphereGeometry( 50 ) );
@@ -50,6 +59,7 @@ Particles.prototype.createParticleMaterial = function(){
 
       position:{ type:"t" , value: this.position },
       t_pos:{type:"t", value:null },
+      t_audio:this.t_audio,
       
       map:{ type:"t" , value:null},
       size:{ type:"f" , value:this.size},

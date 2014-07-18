@@ -93,7 +93,7 @@ function Crystal( params ){
   this.halo.mesh.rotation.x = Math.PI/2;
   this.scene.add( this.halo.mesh );
  
-  this.particles = new Particles( this.height , this.t_audio );
+  this.particles = new Particles( this.scene ,  this.height , this.t_audio );
   this.scene.add( this.particles.particles );
   CRYSTALS.push( this );
 

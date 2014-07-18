@@ -61,6 +61,8 @@ Halo.prototype.createGeometry = function( height , baseData ){
 
     var points = this.createCircle( loc ,  (1000 * ( numOfMain - i )) / newH , vertsPerCircle );
 
+    var circle = i / totalCircles
+
     for( var j = 0; j < points.length; j++ ){
 
       var vert = ( j + (i) * vertsPerCircle );
@@ -81,8 +83,8 @@ Halo.prototype.createGeometry = function( height , baseData ){
       positions[ index + 4 ] = points[up].y;
       positions[ index + 5 ] = points[up].z;
 
-      uvs[ iUV + 0 ]  = Math.random();//vert / totalVerts;  
-      uvs[ iUV + 2 ]  = Math.random();//vertUp / totalVerts;  
+      uvs[ iUV + 0 ]  = circle;//Math.random();//vert / totalVerts;  
+      uvs[ iUV + 2 ]  = circle;//Math.random();//vertUp / totalVerts;  
 
     }
 
@@ -98,6 +100,8 @@ Halo.prototype.createGeometry = function( height , baseData ){
     var loc = new THREE.Vector3( bd[0][0] , bd[0][1] ,  h - 20  );
 
     var points = this.createCircle( loc ,  1000 / h , vertsPerCircle );
+
+    var circle = (i+numOfMain) / totalCircles
 
     for( var j = 0; j < points.length; j++ ){
 
@@ -119,8 +123,8 @@ Halo.prototype.createGeometry = function( height , baseData ){
       positions[ index + 4 ] = points[up].y;
       positions[ index + 5 ] = points[up].z;
       
-      uvs[ iUV + 0 ]  = Math.random();//vert / totalVerts;  
-      uvs[ iUV + 2 ]  = Math.random();//vertUp / totalVerts;  
+      uvs[ iUV + 0 ]  = circle;// Math.random();//vert / totalVerts;  
+      uvs[ iUV + 2 ]  = circle;//Math.random();//vertUp / totalVerts;  
 
 
 

@@ -1,8 +1,7 @@
 
 uniform sampler2D t_oPos;
 uniform sampler2D t_pos;
-
-uniform float justHit;
+uniform mat4 uModelView;
 
 uniform sampler2D t_audio;
 uniform sampler2D t_start;
@@ -35,8 +34,9 @@ void main(){
   vec4 audioY = texture2D( t_audio , vec2( vUv.y , 0. ) );
 
 
-  vec3 curl = curlNoise( pos.xyz * .01 );
-  vel += curl * 5.5 * ( 1. - life );
+  vec3 mvPos = ( uModelView * vec4( pos.xyz , 1. ) ).xyz;
+  vec3 curl = curlNoise( mvPos.xyz * .04 );
+  vel += curl * 1.5 * ( 1. - life );
 
   vel += vec3( 0. , 1. * life , 0. );
 
@@ -56,11 +56,11 @@ void main(){
   //vec3 p = pos.xyz + vel * .6 * audioX.x * audioX.y* audioX.x * audioX.y  ; 
 
 
-  vec3 p = pos.xyz + vel * .9 * (.1 +  audioX.x * audioY.y* audioY.x * audioX.y);
+  vec3 p = pos.xyz + vel * .9 * ( .1 + audioX.x);
 
 
   //life -= .01;
-  life -= .004 * (length( audioX ) + 1.) ;
+  life -= .003 * (length( audioX ) * length( audioY ) + 1.) ;
 
     
   if( life <= 0.0 ){
