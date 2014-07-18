@@ -3,24 +3,24 @@
 <html>
 
 <head>
+  <link rel="stylesheet" type="text/css" href="main.css">
+    
   <style>
-
-    html{ color:#fff; }
-
-    #container{
-      width      : 100%;
-      height     : 100%;
-      position   : absolute;
-      top        : 0px;
-      left       : 0px;
-      background : #000;
+    
+    @font-face {
+      font-family: "GeoSans";
+      src: url( "lib/GeosansLight.ttf" );
     }
+    
+    html{ color:#fff; background:#000; font-family:"GeoSans" }
 
-    #stats{
-      position  : absolute;
-      bottom    : 0px;
-      right     : 0px;
-      z-index   : 999;
+    #GUI{
+
+      position:fixed;
+      right:0px;
+      top:0px;
+      z-index:999;
+
     }
 
   </style>
@@ -52,6 +52,8 @@
 
 <script>
 
+  var APP_STARTED = false;
+
   // Global Variables for THREE.JS
   var container , camera, scene, renderer , stats;
 
@@ -69,19 +71,103 @@
 
   var loader          = new Loader();
   var audioController = new AudioController();
+
   var looper          = new Looper( audioController , timer , {
 
-    beatsPerMinute: 122,
-    beatsPerMeasure: 4,
-    measuresPerLoop: 8
-    
-  });
+      beatsPerMinute: 122,
+      beatsPerMeasure: 4,
+      measuresPerLoop: 8
+      
+    });
 
-     
+    looper.everyLoop( function(){
+
+      console.log( 'LOOSP' );
+
+    });
+
+  loader.onStart = function(){
+    APP_STARTED = true;
+    looper.start();
+  }
+
+
+  var CRYSTAL_PARAMS = [
+
+    {
+    
+      note:'audio/loops/part2/drums.mp3',
+      height:200
+
+    },
+
+    {
+    
+      note:'audio/loops/part2/hats.mp3',
+      height:200
+
+    },
+
+    {
+    
+      note:'audio/loops/part2/lowSynth.mp3',
+      height:200
+
+    },
+
+    {
+    
+      note:'audio/loops/part2/highSynth.mp3',
+      height:200
+
+    },
+
+    {
+    
+      note:'audio/loops/part2/vox.mp3',
+      height:200
+
+    },
+
+     {
+    
+      note:'audio/loops/part1/drums.mp3',
+
+    },
+
+    {
+    
+      note:'audio/loops/part1/hats.mp3',
+
+    },
+
+    {
+    
+      note:'audio/loops/part1/lowSynth.mp3',
+
+    },
+
+    {
+    
+      note:'audio/loops/part1/highSynth.mp3',
+
+    },
+
+    {
+    
+      note:'audio/loops/part1/vox.mp3',
+
+    },
+
+
+  ]
+
   init();
   animate();
 
+
   function init(){
+
 
     controller = new Leap.Controller();
 
@@ -174,30 +260,42 @@
     });
     
 
+    for( var i = 0; i < CRYSTAL_PARAMS.length; i++ ){
 
-    var crystal = new Crystal();
-    crystal.activate();
+      var s = 1 / CRYSTAL_PARAMS.length
+      var x = i * s;
+
+      var shift = Math.floor( x * 2 );
+
+      var crystal = new Crystal(CRYSTAL_PARAMS[i]);
+    
+      crystal.scene.position.x =( x-.25 + s*.5) * 1000 - (500 * shift);
+      crystal.scene.position.z = (shift - .5 ) * 200;
+
+      crystal.activate();
+
+    }
 
   }
 
   function animate(){
 
-    //controls.update();
-    riggedSkeleton.update(0);
-
-    stats.update();
-
     dT.value = clock.getDelta();
     timer.value += dT.value;
-
-
-    objectControls.update();
     audioController.update();
-    looper.update();
+    
 
-    renderer.render( scene , camera );
+    if( APP_STARTED == true ){
+    //controls.update();
+      riggedSkeleton.update(0);
+
+      stats.update();
+      objectControls.update();
+   
+      renderer.render( scene , camera );
 
 
+    }
   
     requestAnimationFrame( animate );
 

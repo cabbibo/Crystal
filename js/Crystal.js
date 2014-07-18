@@ -1,33 +1,60 @@
-function Crystal( height , width , numOf , params ){
+
+
+
+var CRYSTALS = [];
+
+
+function Crystal( params ){
 
   this.params = _.defaults(  params || {} , {
 
     height:100,
     width:15,
     numOf:100,
-    note:'loop/crystal/1.mp3'
+    note:'audio/loops/part1/drums.mp3',
+    looper:looper
 
   });
  
 
   var p = this.params;
 
+  this.looper           = p.looper;
 
-  this.hovered = false;
-  this.selected = false;
-  this.active = false;
+  this.hovered          = false;
+  this.selected         = false;
+  this.active           = false;
+
+  this.preparingToPlay  = false;
+  this.preparingToStop  = false;
+  this.playing          = false;
 
   this.neutralColor   = this.getRandomColor(); 
   this.hoveredColor   = this.getRandomColor();
   this.selectedColor  = this.getRandomColor();
+
+  this.scene    = new THREE.Object3D();
+  this.scene.position.y = 100;
+  //this.position = this.scene.position;
 
   this.geometry = CrystalGeo( p.height , p.width , p.numOf ); 
 
   this.material = new THREE.MeshLambertMaterial();
   this.material.color = this.neutralColor;
 
+
+  loader.addLoad();
   this.note = new LoadedAudio( audioController , this.params.note );
-  this.note.onLoad = loader.onLoad;
+  this.note.onLoad = function(){
+    
+    loader.onLoad();
+    this.looper.everyLoop( this.note.play.bind( this.note ) );
+
+  }.bind( this );
+
+  this.gain = this.note.gain.gain;
+
+  this.gain.value = 0;
 
   this.mesh = new THREE.Mesh( this.geometry , this.material );
   this.mesh.rotation.x = Math.PI/2;
@@ -36,14 +63,20 @@ function Crystal( height , width , numOf , params ){
   this.mesh.hoverOut  = this.hoverOut.bind( this );
   this.mesh.select    = this.select.bind( this );
 
+ // this.mesh.position.x = 100
+
+  this.scene.add( this.mesh );
+
   objectControls.add( this.mesh );
+
+  CRYSTALS.push( this );
 
 }
 
 
 Crystal.prototype.activate = function(){
 
-  scene.add( this.mesh );
+  scene.add( this.scene );
   this.active = true;
 
 }
@@ -98,17 +131,37 @@ Crystal.prototype.prepareToPlay = function(){
 
   this.preparingToPlay = true;
   this.mesh.material.color = this.selectedColor;
+  this.looper.onNextMeasure( this.play.bind( this ) );
 
+
+}
+
+Crystal.prototype.play = function(){
+  
+  this.preparingToPlay = false;
+  this.playing = true;
+   
+  this.gain.value = 1;
 
 }
 
 Crystal.prototype.prepareToStop = function(){
 
   this.preparingToStop = true;
-      this.mesh.material.color = this.hoveredColor;
-
+  this.mesh.material.color = this.hoveredColor;
+  this.looper.onNextMeasure( this.stop.bind( this ) );
 
 }
+
+Crystal.prototype.stop = function(){
+  
+  this.preparingToStop = false;
+  this.playing = false;
+   
+  this.gain.value = 0;
+
+}
+
 
 
 Crystal.prototype.getRandomColor = function(){
