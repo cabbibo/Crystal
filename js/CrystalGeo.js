@@ -3,31 +3,55 @@ function CrystalGeo( height , width , numOf ){
  
   var geometry = new THREE.BufferGeometry();
 
-  geometry.addAttribute( 'position', new Float32Array( numOf * 6 * 6 * 3 ), 3 ); 
-  geometry.addAttribute( 'normal', new Float32Array( numOf * 6 * 6 * 3 ), 3 );
+  geometry.addAttribute( 'position', new Float32Array( (numOf+1) * 6 * 6 * 3 ), 3 ); 
+  geometry.addAttribute( 'normal', new Float32Array( (numOf+1 )* 6 * 6 * 3 ), 3 );
 
   var positions = geometry.getAttribute( 'position' ).array;
   var normals   = geometry.getAttribute( 'normal' ).array;
 
   var directionPower = [0,0,0,0,0,0];
 
-  for( var i = 0; i < numOf; i++ ){
-    
-    // Figure out which direction we are placing the crystal in
-    var which = Math.floor(  Math.random() * 6 );
-
-    directionPower[which] ++;
-
-    var sqr = Math.sqrt( directionPower[which] );
-    var newHeight = (height * ( Math.random() * .3 +.7)) /(sqr);
+  
+  var baseArray = [];
+  
+  for( var i = 0; i < numOf+1; i++ ){
    
-    var posXY = Math.toCart( width * sqr , (which/6) * 2 * Math.PI );
-   
-    var posXYExtra = Math.toCart( width / sqr, ( i / 6 ) * 2 * Math.PI );
 
-    posXY[0] += posXYExtra[0];
-    posXY[1] += posXYExtra[1];
+    var posXY = [];
+    var newHeight = height;
+    var sqr = .7;
+    if( i == 0 ){
+
+      posXY[0] = 0;
+      posXY[1] = 0;
+
+    }else{
+      
+      // Figure out which direction we are placing the crystal in
+      var which = Math.floor(  Math.random() * 6 );
+
+      directionPower[which] ++;
+
+      sqr = Math.sqrt( directionPower[which] );
+      newHeight = (height * ( Math.random() * .3 +.7)) /(sqr);
     
+      if( newHeight > (height * .9) ){
+
+        newHeight = height * .9;
+
+      }
+      posXY = Math.toCart( width * sqr , (which/6) * 2 * Math.PI );
+     
+      var posXYExtra = Math.toCart( width / sqr, ( i / 6 ) * 2 * Math.PI );
+
+      posXY[0] += posXYExtra[0];
+      posXY[1] += posXYExtra[1];
+
+    }
+    
+
+    
+    baseArray.push( [ posXY , -newHeight ] );
     
     var z     = 0;
     
@@ -121,6 +145,7 @@ function CrystalGeo( height , width , numOf ){
   geometry.computeFaceNormals();
   geometry.computeVertexNormals();
 
+  geometry.baseData = baseArray;
 
   return geometry;
 

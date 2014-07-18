@@ -29,15 +29,25 @@ function Crystal( params ){
   this.preparingToStop  = false;
   this.playing          = false;
 
-  this.neutralColor   = this.getRandomColor(); 
-  this.hoveredColor   = this.getRandomColor();
-  this.selectedColor  = this.getRandomColor();
+  this.neutralColor           = this.getRandomColor(); 
+  this.hoveredColor           = this.getRandomColor();
+  this.selectedColor          = this.getRandomColor();
+  this.selectedHoveredColor   = this.getRandomColor();
 
   this.scene    = new THREE.Object3D();
-  this.scene.position.y = 100;
   //this.position = this.scene.position;
 
-  this.geometry = CrystalGeo( p.height , p.width , p.numOf ); 
+  var h = p.height *( 1 + ( Math.random() -.5 ) * .4 );
+  var w = p.width *( 1 + ( Math.random() -.5 ) * .4 );
+  var n = Math.floor( p.numOf *( 1 + ( Math.random() -.5 ) * 1.4 ));
+
+  this.height = h;
+  this.width = w;
+  this.size = n;
+
+  this.geometry = CrystalGeo( h , w , n ); 
+
+  this.baseData = this.geometry.baseData; 
 
   this.material = new THREE.MeshLambertMaterial();
   this.material.color = this.neutralColor;
@@ -52,6 +62,8 @@ function Crystal( params ){
 
   }.bind( this );
 
+  this.t_audio = { type:"t" , value:this.note.texture}
+
   this.gain = this.note.gain.gain;
 
   this.gain.value = 0;
@@ -63,12 +75,26 @@ function Crystal( params ){
   this.mesh.hoverOut  = this.hoverOut.bind( this );
   this.mesh.select    = this.select.bind( this );
 
- // this.mesh.position.x = 100
-
   this.scene.add( this.mesh );
+
+
+  /*var MESH = new THREE.Mesh( 
+      new THREE.IcosahedronGeometry( 100 , 0 ),
+      new THREE.MeshBasicMaterial({ map: this.note.texture })
+  );
+
+  this.scene.add( MESH );*/
 
   objectControls.add( this.mesh );
 
+
+  this.halo = new Halo( this.height, this.baseData , this.t_audio );
+
+  this.halo.mesh.rotation.x = Math.PI/2;
+  this.scene.add( this.halo.mesh );
+ 
+  this.particles = new Particles( this.height , this.t_audio );
+  this.scene.add( this.particles.particles );
   CRYSTALS.push( this );
 
 }
@@ -85,12 +111,18 @@ Crystal.prototype.update = function(){
 
   if( !this.active ) return;
 
+  this.particles.update();
+  this.note.update();
+
 }
 
 Crystal.prototype.hoverOver = function(){
 
   if( !this.selected ){
     this.mesh.material.color = this.hoveredColor;
+  }else{
+    this.mesh.material.color = this.selectedHoveredColor;
+
   }
   
   this.hovered = true;
@@ -102,7 +134,10 @@ Crystal.prototype.hoverOut = function(){
 
   if( !this.selected ){
     this.mesh.material.color = this.neutralColor;
+  }else{
+    this.mesh.material.color = this.selectedColor;
   }
+
   this.hovered = true;
 
 

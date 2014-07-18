@@ -86,7 +86,7 @@
 
     groundMirror = new THREE.Mirror( renderer, camera, { clipBias: 0.003, textureWidth: window.innerWidth, textureHeight: window.innerHeight, color: 0x777777 } );
 		
-	var planeGeo = new THREE.PlaneGeometry( 3000, 3000, 100 , 100 );
+	var planeGeo = new THREE.PlaneGeometry( 300, 3000, 100 , 100 );
 
     mirrorMesh = new THREE.Mesh( planeGeo, groundMirror.material );
     mirrorMesh.add( groundMirror );

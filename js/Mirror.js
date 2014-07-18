@@ -63,15 +63,15 @@ THREE.ShaderLib['mirror'] = {
         "uniform float time;",
 		"varying vec4 mirrorCoord;",
 
-        snoise,
+       // snoise,
 
 		"void main() {",
 
-            "vec2 lookup = vec2(position.x / 10000. , position.y / 10000. ) + vec2( time * .000001 , time * .000002 );",
-            "float noise = snoise( lookup * 2000. );",
-            "vec3 newPos = position + vec3( 0. , 0. , noise * 10. );",
-			"vec4 mvPosition = modelViewMatrix * vec4( newPos , 1.0 );",
-			"vec4 worldPosition = modelMatrix * vec4( newPos, 1.0 );",
+            //"vec2 lookup = vec2(position.x / 10000. , position.y / 10000. ) + vec2( time * .000001 , time * .000002 );",
+            //"float noise = snoise( lookup * 2000. );",
+            //"vec3 newPos = position + vec3( 0. , 0. , noise * 10. );",
+			"vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );",
+			"vec4 worldPosition = modelMatrix * vec4( position, 1.0 );",
 			"mirrorCoord = textureMatrix * worldPosition;",
 
 			"gl_Position = projectionMatrix * mvPosition;",

@@ -37,17 +37,23 @@
 <script src = "lib/ShaderLoader.js"         ></script>
 <script src = "lib/OBJLoader.js"            ></script>
 <script src = "lib/ObjectControls.js"       ></script>
+<script src = "lib/UserAudio.js"          ></script>
 <script src = "lib/LoadedAudio.js"          ></script>
 <script src = "lib/AudioController.js"      ></script>
 <script src = "lib/AudioTexture.js"         ></script>
 <script src = "lib/Looper.js"               ></script>
 <script src = "lib/Loader.js"               ></script>
+<script src = "lib/ShaderLoader.js"         ></script>
+<script src = "lib/PhysicsRenderer.js"      ></script>
+<script src = "lib/ParticleUtils.js"      ></script>
 
 <script src = "lib/RiggedSkeleton.js"       ></script>
 
 <script src = "js/Crystal.js"               ></script>
 <script src = "js/CrystalGeo.js"            ></script>
+<script src = "js/Halo.js"                  ></script>
 <script src = "js/Mirror.js"                ></script>
+<script src = "js/Particles.js"             ></script>
 
 
 <script>
@@ -63,6 +69,8 @@
   // our rigged skeleton
   var riggedSkeleton;
 
+  var controls;
+
   var sceneSize = 100;
 
   var timer =  { type:"f" , value:0}
@@ -71,6 +79,8 @@
 
   var loader          = new Loader();
   var audioController = new AudioController();
+
+  var t_audio = { type:"t" , value: audioController.texture };
 
   var looper          = new Looper( audioController , timer , {
 
@@ -86,11 +96,47 @@
 
     });
 
-  loader.onStart = function(){
+    loader.onStart = function(){
+      console.log( 'STARS');
+
     APP_STARTED = true;
-    looper.start();
   }
 
+
+  var FIRST_FRAME = true;
+
+  /*audioController.mute.gain.value = 0;
+  var userAudio = new UserAudio( audioController );
+
+  loader.addLoad();
+  userAudio.onStreamCreated = function(){
+
+    console.log('STEAM');
+    loader.onLoad();
+
+  }*/
+
+
+  var shaders = new ShaderLoader( 'shaders' );
+
+
+  shaders.load( 'fs-halo' , 'halo' , 'fragment' );
+  shaders.load( 'vs-halo' , 'halo' , 'vertex' );
+  
+  shaders.load( 'fs-particles' , 'particles' , 'fragment' );
+  shaders.load( 'vs-particles' , 'particles' , 'vertex' );
+
+  shaders.load( 'particleSim' , 'particles' , 'simulation' );
+
+  loader.addLoad();
+  shaders.shaderSetLoaded = function(){
+    loader.onLoad();
+    
+    init();
+    animate();
+    looper.start();
+   
+  }
 
   var CRYSTAL_PARAMS = [
 
@@ -162,8 +208,6 @@
 
   ]
 
-  init();
-  animate();
 
 
   function init(){
@@ -182,7 +226,9 @@
 
     // placing our camera position so it can see everything
     camera.position.z = sceneSize *9;
-    camera.position.y = sceneSize* 2;
+    camera.position.y = sceneSize* 5;
+
+    camera.lookAt( new THREE.Vector3() );
 
      riggedSkeleton = new RiggedSkeleton( controller , {
 
@@ -218,6 +264,12 @@
     // Making sure our renderer is always the right size
     window.addEventListener( 'resize', onWindowResize , false );
 
+
+    /*var mesh = new THREE.Mesh(
+      new THREE.IcosahedronGeometry( 200 , 0 ),
+      new THREE.MeshBasicMaterial({ map:audioController.texture})
+    );
+    scene.add( mesh );*/
 
     controller.connect();
     
@@ -268,9 +320,11 @@
       var shift = Math.floor( x * 2 );
 
       var crystal = new Crystal(CRYSTAL_PARAMS[i]);
-    
-      crystal.scene.position.x =( x-.25 + s*.5) * 1000 - (500 * shift);
-      crystal.scene.position.z = (shift - .5 ) * 200;
+
+      var rX =1 + ( Math.random() -.5 ) * .1;
+      var rZ =1 + ( Math.random() -.5 ) * .1;
+      crystal.scene.position.x =( x-.25 + s*.5) * 1000 * rX - (500 * shift);
+      crystal.scene.position.z = (shift - .5 ) * 200 * rZ;
 
       crystal.activate();
 
@@ -283,15 +337,25 @@
     dT.value = clock.getDelta();
     timer.value += dT.value;
     audioController.update();
-    
 
+  
     if( APP_STARTED == true ){
-    //controls.update();
+
+      
+      if( controls ){
+        controls.update();
+      }
       riggedSkeleton.update(0);
 
       stats.update();
       objectControls.update();
-   
+
+      for( var i = 0; i < CRYSTALS.length; i++ ){
+  
+        CRYSTALS[i].update();
+
+      }
+
       renderer.render( scene , camera );
 
 
